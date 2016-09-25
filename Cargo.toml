@@ -1,0 +1,8 @@
+[package]
+name = "rlight"
+version = "0.1.0"
+authors = ["dctrl <dctrl>"]
+
+[dependencies]
+protobuf = "1.0.24"
+secp256k1 = "0.5.6"
