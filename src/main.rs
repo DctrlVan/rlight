@@ -3,26 +3,29 @@ extern crate secp256k1;
 extern crate rand;
 
 use rand::Rng;
-use secp256k1::key::SecretKey;
+use secp256k1::key::{PublicKey, SecretKey};
 
 use secp256k1::Secp256k1;
 
 use bitcoin::network::constants::Network;
 use bitcoin::blockdata::script::*;
 use bitcoin::blockdata::opcodes::All;
-use bitcoin::util::address::{Privkey, PublicKey};
+use bitcoin::util::address::{Privkey};
 use bitcoin::util::address::Address;
 
+#[derive(Debug)]
 enum AnchorOffer {
     WILL_CREATE_ANCHOR,
     WONT_CREATE_ANCHOR,
 }
 
+#[derive(Debug)]
 enum Locktime {
     Seconds(u32),
     Blocks(u32)
 }
 
+#[derive(Debug)]
 struct OpenChannel {
     revocation_hash: [u8; 32],
     next_revocation_hash: [u8; 32],
@@ -36,6 +39,7 @@ struct OpenChannel {
 
 struct Node {
     address : Address,
+    secret: SecretKey,
     private: Privkey,
 }
 
@@ -51,12 +55,28 @@ impl Node {
 
         Node {
             address:address,
+            secret: secret,
             private: private
         }
     }
 
-    fn open_channel(&self, otherNode: Node)-> Result<_> {
+    fn create_public_key(&self)-> PublicKey{
+        let scp = Secp256k1::new();
+        PublicKey::from_secret_key(&scp, &self.secret).unwrap()
+    }
 
+    fn open_channel(&self, min_depth :u32)-> OpenChannel {
+        let mut rng = rand::thread_rng();
+        OpenChannel {
+            revocation_hash:rng.gen::<[u8; 32]>(),
+            next_revocation_hash: rng.gen::<[u8; 32]>(),
+            commit_key: self.create_public_key(),
+            final_key: self.create_public_key(),
+            min_depth: min_depth,
+            delay: Locktime::Blocks(0),
+            anch: AnchorOffer::WILL_CREATE_ANCHOR,
+            initial_fee_rate: 0,
+        }
     }
 
 }
@@ -65,7 +85,7 @@ impl Node {
 
 fn main() {
     let node = Node::generate();
-    println!("{:?}", node.address );
+    println!("{:?}", node.open_channel(0) );
 
     // let builder = Builder::new();
     // let copy = builder
