@@ -2,6 +2,8 @@ extern crate bitcoin;
 extern crate secp256k1;
 extern crate rand;
 
+mod channel;
+
 use rand::Rng;
 use secp256k1::key::{PublicKey, SecretKey};
 
@@ -13,29 +15,7 @@ use bitcoin::blockdata::opcodes::All;
 use bitcoin::util::address::{Privkey};
 use bitcoin::util::address::Address;
 
-#[derive(Debug)]
-enum AnchorOffer {
-    WILL_CREATE_ANCHOR,
-    WONT_CREATE_ANCHOR,
-}
-
-#[derive(Debug)]
-enum Locktime {
-    Seconds(u32),
-    Blocks(u32)
-}
-
-#[derive(Debug)]
-struct OpenChannel {
-    revocation_hash: [u8; 32],
-    next_revocation_hash: [u8; 32],
-    commit_key: PublicKey,
-    final_key: PublicKey,
-    anch: AnchorOffer,
-    min_depth: u32,
-    delay: Locktime,
-    initial_fee_rate: u32
-}
+use channel::*;
 
 struct Node {
     address : Address,
