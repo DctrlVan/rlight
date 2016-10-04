@@ -48,8 +48,8 @@ impl Node {
     fn open_channel(&self, min_depth :u32)-> OpenChannel {
         let mut rng = rand::thread_rng();
         OpenChannel {
-            revocation_hash:rng.gen::<[u8; 32]>(),
-            next_revocation_hash: rng.gen::<[u8; 32]>(),
+            revocation_hash:rng.gen(),
+            next_revocation_hash: rng.gen(),
             commit_key: self.create_public_key(),
             final_key: self.create_public_key(),
             min_depth: min_depth,
