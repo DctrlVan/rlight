@@ -6,7 +6,6 @@ mod channel;
 
 use rand::Rng;
 use secp256k1::key::{PublicKey, SecretKey};
-
 use secp256k1::Secp256k1;
 
 use bitcoin::network::constants::Network;
@@ -14,6 +13,8 @@ use bitcoin::blockdata::script::*;
 use bitcoin::blockdata::opcodes::All;
 use bitcoin::util::address::{Privkey};
 use bitcoin::util::address::Address;
+use bitcoin::util::hash::Hash160;
+use bitcoin::util::base58::ToBase58;
 
 use channel::*;
 
@@ -59,6 +60,18 @@ impl Node {
         }
     }
 
+}
+
+fn create_anchor_tx(key1: Address, key2: Address, amount: u64) {
+
+    let (hash1, hash2) = (key1.base58_layout(), key2.base58_layout());
+
+    let script = Builder::new()
+        .push_opcode(All::OP_PUSHNUM_2)
+        .push_slice(&hash1)
+        .push_slice(&hash2)
+        .push_opcode(All::OP_PUSHNUM_2)
+        .push_opcode(All::OP_CHECKMULTISIG);
 }
 
 

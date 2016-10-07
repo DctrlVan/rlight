@@ -25,3 +25,10 @@ pub struct OpenChannel {
     pub delay: Locktime,
     pub initial_fee_rate: u32
 }
+
+#[derive(Debug)]
+pub struct OpenAnchor {
+    pub txid: [u8; 32],
+    pub output_index: u32,
+    pub amount: u64
+}
