@@ -24,6 +24,17 @@ struct Node {
     private: Privkey,
 }
 
+fn createAddress()-> Address{
+    let scp = Secp256k1::new();
+    let mut rng = rand::thread_rng();
+    let secret = SecretKey::new( &scp, &mut rng );
+    let private = Privkey::from_key(Network::Testnet, secret, false );
+    let address = private
+        .to_address(&scp)
+        .unwrap();
+    address
+}
+
 impl Node {
     fn generate()-> Self {
         let scp = Secp256k1::new();
@@ -62,7 +73,9 @@ impl Node {
 
 }
 
+
 fn create_anchor_tx(key1: Address, key2: Address, amount: u64) {
+
 
     let (hash1, hash2) = (key1.base58_layout(), key2.base58_layout());
 
@@ -71,16 +84,21 @@ fn create_anchor_tx(key1: Address, key2: Address, amount: u64) {
         .push_slice(&hash1)
         .push_slice(&hash2)
         .push_opcode(All::OP_PUSHNUM_2)
-        .push_opcode(All::OP_CHECKMULTISIG);
-}
+        .push_opcode(All::OP_CHECKMULTISIG)
+        .into_script();
 
+    println!("{:?}", script);
+}
 
 
 fn main() {
     let node = Node::generate();
     println!("{:?}", node.open_channel(0) );
 
-    // let builder = Builder::new();
-    // let copy = builder
-    //     .push_opcode(All::OP_CHECKSIG);
+    let addr1:Address = createAddress();
+    let addr2:Address = createAddress();
+    println!("{:?},{:?}", addr1, addr2 );
+
+
+    create_anchor_tx(addr1, addr2, 1000);
 }
