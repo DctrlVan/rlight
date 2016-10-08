@@ -17,6 +17,7 @@ use bitcoin::util::hash::Hash160;
 use bitcoin::util::base58::ToBase58;
 use bitcoin::blockdata::transaction::*;
 
+use bitcoin::util::hash::Sha256dHash;
 
 use channel::*;
 
@@ -75,7 +76,6 @@ impl Node {
 
 }
 
-
 fn create_anchor_tx(key1: Address,key2: Address, prev_txin: TxIn, amount: u64) -> Transaction {
 
     let (hash1, hash2) = (key1.base58_layout(), key2.base58_layout());
@@ -100,6 +100,9 @@ fn create_anchor_tx(key1: Address,key2: Address, prev_txin: TxIn, amount: u64) -
         output:vec![txout],
         witness:vec![vec![vec![0]]]
     }
+
+
+
 }
 
 
@@ -107,9 +110,19 @@ fn main() {
     let node = Node::generate();
     println!("{:?}", node.open_channel(0) );
 
+    let prev_hash = Sha256dHash::from_hex("812e898507ad95c9b89890e39c4b8a158ee8293ed462397de3a574739cb71937");
+
+    let tx_in = TxIn {
+        prev_hash: prev_hash.unwrap(),
+        prev_index: 0,
+        script_sig: Script::new(),
+        sequence: 0xFFFFFFFF,
+    };
+
     let addr1:Address = createAddress();
     let addr2:Address = createAddress();
     println!("{:?},{:?}", addr1, addr2 );
 
-    // create_anchor_tx(addr1, addr2, 1000);
+    println!("{:?}" , create_anchor_tx(addr1, addr2,tx_in,1000));
+
 }
