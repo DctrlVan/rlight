@@ -15,6 +15,8 @@ use bitcoin::util::address::{Privkey};
 use bitcoin::util::address::Address;
 use bitcoin::util::hash::Hash160;
 use bitcoin::util::base58::ToBase58;
+use bitcoin::blockdata::transaction::*;
+
 
 use channel::*;
 
@@ -74,12 +76,11 @@ impl Node {
 }
 
 
-fn create_anchor_tx(key1: Address, key2: Address, amount: u64) {
-
+fn create_anchor_tx(key1: Address,key2: Address, prev_txin: TxIn, amount: u64) -> Transaction {
 
     let (hash1, hash2) = (key1.base58_layout(), key2.base58_layout());
 
-    let script = Builder::new()
+    let script_out = Builder::new()
         .push_opcode(All::OP_PUSHNUM_2)
         .push_slice(&hash1)
         .push_slice(&hash2)
@@ -87,7 +88,18 @@ fn create_anchor_tx(key1: Address, key2: Address, amount: u64) {
         .push_opcode(All::OP_CHECKMULTISIG)
         .into_script();
 
-    println!("{:?}", script);
+    let txout = TxOut {
+        value: amount,
+        script_pubkey: script_out
+    };
+
+    Transaction {
+        version: 1,
+        lock_time: 0,
+        input: vec![prev_txin],
+        output:vec![txout],
+        witness:vec![vec![vec![0]]]
+    }
 }
 
 
@@ -99,6 +111,5 @@ fn main() {
     let addr2:Address = createAddress();
     println!("{:?},{:?}", addr1, addr2 );
 
-
-    create_anchor_tx(addr1, addr2, 1000);
+    // create_anchor_tx(addr1, addr2, 1000);
 }
